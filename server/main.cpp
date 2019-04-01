@@ -129,6 +129,7 @@ struct StartupArgs
     std::string strDosProtect;
     std::string strConfigFile;
     std::string strReuseAddr;
+    std::string strAuthType;
     
 };
 
@@ -151,6 +152,7 @@ void DumpStartupArgs(StartupArgs& args)
     PRINTARG(strMaxConnections);
     PRINTARG(strDosProtect);
     PRINTARG(strReuseAddr);
+    PRINTARG(strAuthType);
     Logging::LogMsg(LL_DEBUG, "--------------------------\n");
 }
 
@@ -199,6 +201,11 @@ void DumpConfig(CStunServerConfig &config)
     {
         Logging::LogMsg(LL_DEBUG, "Max TCP Connections per thread: %d", config.nMaxConnections);
     }
+
+    if (config.nAuthType > 0)
+    {
+        Logging::LogMsg(LL_DEBUG, "Authentication type: %d", config.nAuthType);
+    }
 }
 
 
@@ -243,6 +250,7 @@ HRESULT BuildServerConfigurationFromArgs(StartupArgs& argsIn, CStunServerConfig*
     bool fHasAtLeastTwoAdapters = false;
     CStunServerConfig config;
     int nMaxConnections = 0;
+    int nAuthType = 0;
     const char* pszPrimaryAdvertised = argsIn.strPrimaryAdvertised.c_str();
     const char* pszAltAdvertised = argsIn.strAlternateAdvertised.c_str();
 
@@ -333,7 +341,21 @@ HRESULT BuildServerConfigurationFromArgs(StartupArgs& argsIn, CStunServerConfig*
     }
     
     
-    // ---- MAX Connections -----------------------------------------------------
+    // ---- AUTHENTICATION TYPE ------------------------------------------------
+    nAuthType = 0;
+    if (args.strAuthType.length() > 0)
+    {
+        hr = StringHelper::ValidateNumberString(args.strAuthType.c_str(), 0, 2, &nAuthType);
+        if (FAILED(hr))
+        {
+            Logging::LogMsg(LL_ALWAYS, "Authentication type value is invalid.  Value must be between 0-2");
+            Chk(hr);
+        }
+        config.nAuthType = nAuthType;
+    }
+
+
+    // ---- MAX CONNECTIONS -----------------------------------------------------
     nMaxConnections = 0;
     if (args.strMaxConnections.length() > 0)
     {
@@ -542,6 +564,7 @@ HRESULT ParseCommandLineArgs(int argc, char** argv, int startindex, StartupArgs*
     cmdline.AddOption("ddp", no_argument, &pStartupArgs->strDosProtect);
     cmdline.AddOption("configfile", required_argument, &pStartupArgs->strConfigFile);
     cmdline.AddOption("reuseaddr", no_argument, &pStartupArgs->strReuseAddr);
+    cmdline.AddOption("authtype", required_argument, &pStartupArgs->strAuthType);
 
     cmdline.ParseCommandLine(argc, argv, startindex, &fError);
 
@@ -598,6 +621,7 @@ HRESULT LoadConfigsFromFile(const std::string& filename, std::vector<StartupArgs
             args.strMaxConnections = child.get("maxconn", "");
             args.strDosProtect = child.get("ddp", "");
             args.strReuseAddr = child.get("reuseaddr", "");
+            args.strAuthType = child.get("authtype", "");
             
             configurations.push_back(args);
         }

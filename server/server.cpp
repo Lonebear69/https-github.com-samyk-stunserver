@@ -21,6 +21,7 @@
 #include "stunsocketthread.h"
 #include "server.h"
 #include "ratelimiter.h"
+#include "sampleauthprovider.h"
 
 
 
@@ -32,6 +33,7 @@ fHasAA(false),
 fMultiThreadedMode(false),
 fTCP(false),
 nMaxConnections(0), // zero means default
+nAuthType(0), // zero means default
 fEnableDosProtection(false),
 fReuseAddr(false)
 {
@@ -107,6 +109,10 @@ HRESULT CStunServer::Initialize(const CStunServerConfig& config)
     // optional code: create an authentication provider and initialize it here (if you want authentication)
     // set the _spAuth member to reference it
     // Chk(CYourAuthProvider::CreateInstanceNoInit(&_spAuth));
+    if (config.nAuthType == 1)
+      _spAuth = new CShortTermAuth();
+    else if (config.nAuthType == 2)
+      _spAuth = new CLongTermAuth();
     
     // Create the sockets and initialize the TSA thing
     if (config.fHasPP)

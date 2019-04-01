@@ -26,6 +26,7 @@ The following options are supported.
     --protocol PROTO
     --maxconn MAXCONN
     --verbosity LOGLEVEL
+    --authtype TYPE
     --ddp
     --primaryadvertised
     --altadvertised
@@ -201,6 +202,14 @@ ____
 **--reuseaddr**
 
 The --reuseaddr switch allows the STUN server port to be shared with other processes. This is useful for scenarios where another process needs to send from the STUN server port.
+
+____
+
+**--authtype** TYPE
+
+Where TYPE is 0 for no authentication, 1 for ShortTermAuth, or 2 for LongTermAuth (see server/sampleauthprovider.cpp)
+
+No authentication (0) is the default.
 
 ____
 

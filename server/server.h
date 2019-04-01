@@ -39,6 +39,7 @@ public:
     
     bool fTCP; // if true, then use TCP instead of UDP
     uint32_t nMaxConnections; // only valid for TCP (on a per-thread basis)
+    uint8_t nAuthType; // authentication type
 
     CSocketAddress addrPP; // address for PP
     CSocketAddress addrPA; // address for PA
